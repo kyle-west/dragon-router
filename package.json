@@ -1,0 +1,16 @@
+{
+  "name": "client-router",
+  "version": "1.0.0",
+  "description": "Express-like Client Side Routing Manager",
+  "author": {
+    "name": "Kyle West",
+    "url": "https://github.com/kyle-west"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kyle-west/client-router.git"
+  },
+  "scripts": {
+    "start": "python3 -m http.server 5000"
+  }
+}

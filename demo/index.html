@@ -1,0 +1,49 @@
+<html>
+
+<head>
+  <script type="module">
+    import { ClientRouter } from '../client-router.js';
+    let router = new ClientRouter();
+
+
+    const middleware1 = (context, next) => {
+      console.log("CLIENT-SIDE ROUTING TO: ", context.path);
+      context.logged = true; // should modify the context for the next middleware
+      next();
+    };
+    const middleware2 = (context, next) => {
+      console.log(context);
+      next();
+    };
+
+
+    router.use('/page', middleware1, middleware2, (context) => {
+      document.getElementById('page-title').innerHTML = "Default Page";
+    });
+    router.use(`/page/:num`, middleware1, middleware2, (context) => {
+      document.getElementById('page-title').innerHTML = "Page " + context.params.num;
+    });
+
+    router.use(`/:section(about|contact)`, middleware1, middleware2, (context) => {
+      document.getElementById('page-title').innerHTML = context.params.section + " page";
+    });
+
+    router.registerOn(window);    
+  </script>
+</head>
+
+<body>
+  <h1 id="page-title">DEMO PAGE</h1>
+
+  <p><a href="/demo/index.html">/demo/index.html (should reload)</a></p>
+  <br>
+  <p><a href="/page">/page</a></p>
+  <p><a href="/page/1">/page/1</a></p>
+  <p><a href="/page/2">/page/2</a></p>
+  <p><a href="/page/3">/page/3</a></p>
+  <br>
+  <p><a href="/about">/about</a></p>
+  <p><a href="/contact">/contact</a></p>
+</body>
+
+</html>

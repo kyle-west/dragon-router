@@ -3,7 +3,7 @@
 <head>
   <script type="module">
     import { ClientRouter } from '../client-router.js';
-    let router = new ClientRouter();
+    let router = new ClientRouter({ routerId: 'demo-router', debug: true });
 
 
     const middleware1 = (context, next) => {
@@ -12,7 +12,7 @@
       next();
     };
     const middleware2 = (context, next) => {
-      console.log(context);
+      console.log('{PARAMS}:', context.params);
       next();
     };
 
@@ -20,12 +20,17 @@
     router.use('/page', middleware1, middleware2, (context) => {
       document.getElementById('page-title').innerHTML = "Default Page";
     });
+
     router.use(`/page/:num`, middleware1, middleware2, (context) => {
       document.getElementById('page-title').innerHTML = "Page " + context.params.num;
     });
 
     router.use(`/:section(about|contact)`, middleware1, middleware2, (context) => {
       document.getElementById('page-title').innerHTML = context.params.section + " page";
+    });
+
+    router.use(`/:section(about|contact)/:subsection`, middleware1, middleware2, (context) => {
+      document.getElementById('page-title').innerHTML = context.params.section + " page | " + context.params.subsection;
     });
 
     router.registerOn(window);    
@@ -38,12 +43,18 @@
   <p><a href="/demo/index.html">/demo/index.html (should reload)</a></p>
   <br>
   <p><a href="/page">/page</a></p>
+  <p><a href="/page/">/page/</a></p>
+  <br>
   <p><a href="/page/1">/page/1</a></p>
   <p><a href="/page/2">/page/2</a></p>
   <p><a href="/page/3">/page/3</a></p>
   <br>
   <p><a href="/about">/about</a></p>
   <p><a href="/contact">/contact</a></p>
+  <br>
+  <p><a href="/contact/pictures">/contact/pictures</a></p>
+  <br>
+  <p><a href="/should/404">/should/404</a></p>
 </body>
 
 </html>

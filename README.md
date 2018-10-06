@@ -37,7 +37,39 @@ const router = new ClientRouter(options);
 
 ### Route matching
 
-`<<<<<<<<<<<<<<<<<<<<< TODO >>>>>>>>>>>>>>>>>>>>`
+Route matching follows a similar pattern as express. You can match literal routes
+or a tokenized route that populates the `Context` with parameters.
+
+```js
+// render a page on a literal path matching
+router.use('/about', renderYourAboutPageCB);
+```
+
+```js
+router.use('/:section/:subSection', (context) => {
+  
+  // prefixing a path section with ':' will name that section in `context.params` 
+  let section = context.params.section;
+  let subSection = context.params.subSection;
+
+  // now you can use the grepped data to apply on your app.
+  renderYourPageCB(section, subSection);
+
+});
+```
+
+You can append a parameter declaration with `(` `)` to specify a regex pattern
+to enforce a match.
+
+```js
+router.use('/:section(home|about)/:subSection', (context) => {
+  // now, the path will only ever match if the `section` is 'home' or 'about'
+  let section = context.params.section;
+
+  ...
+  
+});
+```
 
 ### Middleware
 `<<<<<<<<<<<<<<<<<<<<< TODO >>>>>>>>>>>>>>>>>>>>`

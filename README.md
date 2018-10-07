@@ -24,7 +24,6 @@ router.registerOn(window);
 
 ### Options
 
-`<<<<<<<<<<<<<<<<<<<<< TODO >>>>>>>>>>>>>>>>>>>>`
 ```js
 let options = {
   routerId: 'my-cool-client-router', // unique identifier between apps
@@ -72,4 +71,20 @@ router.use('/:section(home|about)/:subSection', (context) => {
 ```
 
 ### Middleware
-`<<<<<<<<<<<<<<<<<<<<< TODO >>>>>>>>>>>>>>>>>>>>`
+
+Middleware is a pipeline of functions that get applied when a matching route is 
+rendered. A middleware function takes two parameters, `context`, and `next`. The `next`
+argument is a function that envokes the next middleware in the pipeline. Naturally, 
+ `next()` should not be called in the last function of the pipeline.
+
+```js
+let loggingMiddleware = (context, next) => {
+  console.log('[ClientRouter]: navigating to ', context.path)
+  next(); 
+}
+
+...
+
+router.use('/:view', loggingMiddleware, renderYourAboutPageCB);
+```
+

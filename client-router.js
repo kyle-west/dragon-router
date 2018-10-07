@@ -1,7 +1,7 @@
 /*******************************************************************************
 * @class stores the state of the route and used to track page state
 *******************************************************************************/
-class Context {
+export class Context {
   constructor (url = "", routerId) {
     this.url = url;
     let fullPath;
@@ -16,6 +16,7 @@ class Context {
     this.path = path || '';
     this.routerId = routerId;
     this.collectSearchParams(search);
+    this.isRecordedHistory = false;
   }
   
   collectSearchParams (search) {
@@ -35,7 +36,7 @@ class Context {
 /*******************************************************************************
 * @class Tokenizes a path to help with better matching and grepping strings
 *******************************************************************************/
-class TokenizedPath {
+export class TokenizedPath {
   constructor (path) {
     this.path = path;
 
@@ -95,7 +96,7 @@ class TokenizedPath {
 /*******************************************************************************
 * @class fires a set of middleware callbacks when a Context matches its route
 *******************************************************************************/
-class RouteHandler {
+export class RouteHandler {
   constructor (path, actions) {
     this.path = path;
     this.tokenizedPath = new TokenizedPath(path);
@@ -148,7 +149,6 @@ export class ClientRouter {
   registerOn(window) {
     let onclick = window.document.ontouchstart ? 'touchstart' : 'click';
     window.addEventListener(onclick, this._onClick.bind(this));
-    window.addEventListener('pushstate', this._onPushState.bind(this));
     window.addEventListener('popstate', this._onPopState.bind(this));
     this.debug && console.log(`Router {${this.routerId}} registered to`, window, this);
   }
@@ -177,15 +177,11 @@ export class ClientRouter {
     e.preventDefault();
     this.evalute(new Context(path, this.routerId));
   }
-
-  _onPushState (e) {
-    console.warn('ClientRouter::onPushState NOT IMPLEMENTED');
-    debugger;
-  }
-
+  
   _onPopState (e) {
-    console.warn('ClientRouter::onPopState NOT IMPLEMENTED');
-    debugger;
+    if (e.state && e.state.routerId === this.routerId) {
+      this.evalute(e.state);
+    }
   }
   
   evalute (context) {
@@ -199,6 +195,9 @@ export class ClientRouter {
   }
   
   pushState (context) {
-    window.history.pushState(context, null, context.path)
+    if (!context.isRecordedHistory) {
+      context.isRecordedHistory = true;
+      window.history.pushState(context, null, context.path)
+    }
   }
 }

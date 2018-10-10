@@ -27,7 +27,7 @@ router.registerOn(window);
 ```js
 let options = {
   routerId: 'my-cool-client-router', // unique identifier between apps
-  debug: true,                       // show additional logging info
+  debug: true                        // show additional logging info
 }
 
 const router = new ClientRouter(options);
@@ -62,11 +62,11 @@ to enforce a match.
 
 ```js
 router.use('/:section(home|about)/:subSection', (context) => {
+
   // now, the path will only ever match if the `section` is 'home' or 'about'
   let section = context.params.section;
-
-  ...
   
+  ...
 });
 ```
 

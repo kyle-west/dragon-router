@@ -9,6 +9,7 @@ export class Context {
       let [proto, rest] = url.split("://");
       this.protocol = proto;
       fullPath = rest.substr(rest.indexOf('/'))
+      this.domain = rest.substring(0, rest.indexOf('/'));
     } else {
       fullPath = url;
     }
@@ -128,11 +129,8 @@ export class RouteHandler {
 * @exports ClientRouter
 * @class manages the client routing on the window
 * 
-* @todo Add manual navigators;
-*          - `ClientRouter.navigate()`
-*          - `ClientRouter.back()`
-*          - `ClientRouter.forward()`
-*          - `ClientRouter.redirect()`
+* @todo list:
+*        - Add `*` wildcard ends of routes. 
 *******************************************************************************/
 export class ClientRouter {
   constructor (options) {
@@ -147,10 +145,17 @@ export class ClientRouter {
   }
 
   registerOn(window) {
-    let onclick = window.document.ontouchstart ? 'touchstart' : 'click';
-    window.addEventListener(onclick, this._onClick.bind(this));
-    window.addEventListener('popstate', this._onPopState.bind(this));
-    this.debug && console.log(`Router {${this.routerId}} registered to`, window, this);
+    if (!window.attachedClientRouter) {
+      this.domain = new Context(window.location.href).domain;
+      let onclick = window.document.ontouchstart ? 'touchstart' : 'click';
+      window.addEventListener(onclick, this._onClick.bind(this));
+      window.addEventListener('popstate', this._onPopState.bind(this));
+      window.attachedClientRouter = this;
+      this.window = window;
+      this.debug && console.log(`Router {${this.routerId}} registered to`, window, this);
+    } else {
+      throw new Error(`ClilentRouter::registerOn(): a router is already attached: ClientRouter {#${window.attachedClientRouter.routerId}}`)
+    }
   }
 
   _onClick (e) {
@@ -185,19 +190,37 @@ export class ClientRouter {
   }
   
   evalute (context) {
-    for (let i = 0; i < this.registrar.length; i++) {
-      if (this.registrar[i].matches(context)) {
-        this.pushState(context);
-        return;
+    if (this.domain === context.domain) {
+      for (let i = 0; i < this.registrar.length; i++) {
+        if (this.registrar[i].matches(context)) {
+          this.pushState(context);
+          return;
+        }
       }
     }
-    window.location = context.url;
+    this.window.location = context.url;
   }
   
   pushState (context) {
     if (!context.isRecordedHistory) {
       context.isRecordedHistory = true;
-      window.history.pushState(context, null, context.path)
+      this.window.history.pushState(context, null, context.path)
     }
+  }
+
+  redirect (path, context) {
+    this.evalute(context || new Context(path, this.routerId));
+  }
+
+  navigate (path) {
+    this.evalute(new Context(path, this.routerId));
+  }
+
+  back () {
+    this.window.history.back();
+  }
+
+  forward () {
+    this.window.history.forward();
   }
 }

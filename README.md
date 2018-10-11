@@ -88,3 +88,44 @@ let loggingMiddleware = (context, next) => {
 router.use('/:view', loggingMiddleware, renderYourAboutPageCB);
 ```
 
+## Derived Subpaths
+
+A `DerivedSubpath` allows for a route to specify default values derived from a 
+given callback. The callback for the DerivedSubpath can return an `async` object 
+or a `String`. This is especially useful for forwarding to fully qualified paths 
+in your app. 
+
+Here is an example:
+
+```js
+let defaultSection = new DerivedSubpath('section', (context) => {
+  return 'main'; // or whatever you need to do to compute the default `section`
+})
+router.use(defaultSection);
+
+...
+
+router.use('/page/$:section(main|about|contact)', renderPageSectionCB)
+```
+
+By this pinciple, the following are equivilant:
+
+```js
+router.use('/page', (context) => {
+  router.redirect(`/page/main`);
+})
+router.use('/page/:section(main|about|contact)', (context) => {
+  router.redirect(`/page/${context.params.section}/default`);
+});
+router.use('/page/:section(main|about|contact)/:subsection', renderPageCB);
+```
+
+and 
+
+```js
+router.use(new DerivedSubpath('section',    _ => 'main'));
+router.use(new DerivedSubpath('subsection', _ => 'default'));
+router.use('/page/$:section(main|about|contact)/$:subsection', renderPageCB);
+```
+
+The later being easier to read and understand by the developer than the former.

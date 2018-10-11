@@ -95,12 +95,23 @@ export class TokenizedPath {
 
 
 /*******************************************************************************
+* @class 
+*******************************************************************************/
+export class DerivedSubpath {
+  constructor (name, callback) {
+    this.name = name;
+    this.callback = callback;
+  }
+}
+
+
+/*******************************************************************************
 * @class fires a set of middleware callbacks when a Context matches its route
 *******************************************************************************/
 export class RouteHandler {
   constructor (path, actions) {
     this.path = path;
-    this.tokenizedPath = new TokenizedPath(path);
+    this.tokenizedPath = new TokenizedPath(path.replace(/\$:/g, ':'));
     this.actions = actions;
   }
 
@@ -138,10 +149,43 @@ export class ClientRouter {
     this.routerId = options.routerId || Math.random();
     this.debug = !!(options.debug);
     this.registrar = [];
+    this.subpaths = {};
   }
 
-  use (path, ...actions) {
-    this.registrar.push(new RouteHandler(path, actions));
+  use (firstArg, ...actions) {
+    if (firstArg instanceof DerivedSubpath) {
+      this.subpaths[firstArg.name] = firstArg.callback;
+    } else if (firstArg instanceof RouteHandler) {
+      this.registerHandlers(firstArg);
+    } else if (typeof firstArg === 'string') {
+      this.registerHandlers(new RouteHandler(firstArg, actions));
+    }
+  }
+  
+  registerHandlers (routeHandle, isRecursive = false) {
+    let route = routeHandle.path;
+    if (route.includes("$:")) {
+      let idx = route.indexOf("$:");
+      let before = route.substring(0, idx-1);
+      let rest = route.substr(idx+2);
+      let dPath = rest.split('/')[0].split('(')[0];
+
+      this.registrar.push(new RouteHandler(before, [async (context) => {
+        try {
+          let lastChar = context.path.length-1;
+          let base = (context.path[lastChar] === '/') ? context.path.substring(0, lastChar) : context.path; 
+          let forwardPath = `${base}/${await this.subpaths[dPath](context)}`;
+          this.redirect(forwardPath);
+        } catch (err) { throw err; }
+      }]));
+
+      let remainingRoute = route.replace('$:', ':');
+      if (remainingRoute.includes('$:')) {
+        this.registerHandlers(new RouteHandler(remainingRoute), true)
+      }
+    }
+
+    !isRecursive && this.registrar.push(routeHandle);
   }
 
   registerOn(window) {
@@ -189,11 +233,11 @@ export class ClientRouter {
     }
   }
   
-  evalute (context) {
-    if (this.domain === context.domain) {
+  evalute (context, replaceState) {
+    if ((context.domain && this.domain === context.domain) || !context.domain) {
       for (let i = 0; i < this.registrar.length; i++) {
         if (this.registrar[i].matches(context)) {
-          this.pushState(context);
+          this.pushState(context, replaceState);
           return;
         }
       }
@@ -201,15 +245,19 @@ export class ClientRouter {
     this.window.location = context.url;
   }
   
-  pushState (context) {
+  pushState (context, replace = false) {
     if (!context.isRecordedHistory) {
       context.isRecordedHistory = true;
-      this.window.history.pushState(context, null, context.path)
+      if (replace) {
+        this.window.history.replaceState(context, null, context.path)
+      } else {
+        this.window.history.pushState(context, null, context.path)
+      }
     }
   }
 
-  redirect (path, context) {
-    this.evalute(context || new Context(path, this.routerId));
+  redirect (path) {
+    this.evalute(new Context(path, this.routerId), true);
   }
 
   navigate (path) {

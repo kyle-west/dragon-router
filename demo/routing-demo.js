@@ -36,25 +36,15 @@ router.use(`/:section(about|contact)/:subsection`, middleware1, middleware2, (co
   document.getElementById('page-title').innerHTML = context.params.section + " page | " + context.params.subsection;
 });
 
-router.use(new DerivedSubpath('subsection', (context) => {
-  return Promise.resolve('default-path');
-}))
-
+router.use(new DerivedSubpath('subsection', (context) => { return 'default-path'; }))
 router.use(`/derived-subpath/$:subsection`, middleware1, middleware2, (context) => {
   document.getElementById('page-title').innerHTML = "DerivedSubpath: " + context.params.subsection;
 });
 
 
-router.use(new DerivedSubpath('first', (context) => {
-  return Promise.resolve('abc');
-}))
-router.use(new DerivedSubpath('second', (context) => {
-  return 'sub-sub-page';
-}))
-router.use(new DerivedSubpath('third', (context) => {
-  return 's0';
-}))
-
+router.use(new DerivedSubpath('first',  _ => { return Promise.resolve('abc'); }))
+router.use(new DerivedSubpath('second', _ => { return 'sub-sub-page'; }))
+router.use(new DerivedSubpath('third',  _ => { return 's0'; }))
 router.use(`/multi-derived-subpath/$:first(abc|123)/$:second/$:third`, middleware1, middleware2, (context) => {
   document.getElementById('page-title').innerHTML = "Muiltiple DerivedSubpath: " 
     + context.params.first + " -> " 

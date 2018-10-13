@@ -142,8 +142,6 @@ export class RouteHandler {
 * 
 * @todo list:
 *        - Add `*` wildcard ends of routes. 
-*        - Add `?` optional token. 
-*        - make sure derived paths work with appended stuff. 
 *******************************************************************************/
 export class ClientRouter {
   constructor (options) {
@@ -166,6 +164,24 @@ export class ClientRouter {
   
   registerHandlers (routeHandle, isRecursive = false) {
     let route = routeHandle.path;
+
+    if (route.includes("?")) {
+      let full = [];
+      let part = [];
+      route.split('/').forEach(path => {
+        if (path[path.length -1] === "?") {
+          full.push(path.substring(0, path.length - 1))
+        } else {
+          full.push(path);
+          part.push(path);
+        }
+      });
+
+      this.registerHandlers(new RouteHandler(part.join('/'), routeHandle.actions))
+      this.registerHandlers(new RouteHandler(full.join('/'), routeHandle.actions))
+      return;
+    }
+
     if (route.includes("$:")) {
       let idx = route.indexOf("$:");
       let before = route.substring(0, idx-1);

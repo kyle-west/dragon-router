@@ -19,13 +19,12 @@ let demoRouteHandler = new RouteHandler('/demo', [middleware1, middleware2, (con
 
 router.use(demoRouteHandler);
 
-
-router.use('/page', middleware1, middleware2, (context) => {
-  document.getElementById('page-title').innerHTML = "Default Page";
-});
-
-router.use(`/page/:num`, middleware1, middleware2, (context) => {
-  document.getElementById('page-title').innerHTML = "Page " + context.params.num;
+router.use(`/page/:num?`, middleware1, middleware2, (context) => {
+  if (context.params.num) {
+    document.getElementById('page-title').innerHTML = "Page " + context.params.num;
+  } else {
+    document.getElementById('page-title').innerHTML = "Default Page";
+  }
 });
 
 router.use(`/:section(about|contact)`, middleware1, middleware2, (context) => {

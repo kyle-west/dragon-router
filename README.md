@@ -88,6 +88,11 @@ let loggingMiddleware = (context, next) => {
 router.use('/:view', loggingMiddleware, renderYourAboutPageCB);
 ```
 
+## Optional Subpaths
+
+    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
 ## Derived Subpaths
 
 A `DerivedSubpath` allows for a route to specify default values derived from a 

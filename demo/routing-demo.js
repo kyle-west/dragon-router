@@ -46,9 +46,17 @@ router.use(new DerivedSubpath('second', _ => { return 'sub-sub-page'; }))
 router.use(new DerivedSubpath('third',  _ => { return 's0'; }))
 router.use(`/multi-derived-subpath/$:first(abc|123)/$:second/$:third`, middleware1, middleware2, (context) => {
   document.getElementById('page-title').innerHTML = "Muiltiple DerivedSubpath: " 
-    + context.params.first + " -> " 
-    + context.params.second + " -> " 
-    + context.params.third;
+  + context.params.first + " -> " 
+  + context.params.second + " -> " 
+  + context.params.third;
 });
+
+router.use('/:path/star*', middleware1, middleware2, (context) => {
+  document.getElementById('page-title').innerHTML = context.path;
+})
+
+// router.use(['/abc', '/123'], () => {
+//   document.getElementById('page-title').innerHTML = '/abc || /123';
+// })
 
 router.registerOn(window);

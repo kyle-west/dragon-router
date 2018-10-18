@@ -40,7 +40,9 @@ export class Context {
 export class TokenizedPath {
   constructor (path) {
     this.path = path;
-
+    this.regExPath = (path[path.length -1] === '*') 
+                   ? new RegExp('^'+path.substr(0,path.length-1).replace(/\:[^\/]*/, '.*')+'.*$')
+                   : new RegExp('^'+path+'$');
     this.sections = (path[0] === '/') ? path.slice(1).split('/') : path.split('/');
     this.tokens = this.sections.map(part => {
       if (TokenizedPath.MATCHING_PARAM.test(part)) {
@@ -58,6 +60,8 @@ export class TokenizedPath {
   }
   
   matches (str) {
+    let matchesFullPathRegex = (this.regExPath.test(str)); 
+
     // allow for paths that have a trailing '/'
     let path = str;
     if (str[str.length-1] === '/') {
@@ -67,17 +71,17 @@ export class TokenizedPath {
     // require all literal paths to include '/' at the front
     let parts = path.slice(1).split('/');
 
-    if (parts.length !== this.sections.length) return false;
+    if (!matchesFullPathRegex && (parts.length !== this.sections.length)) return false;
 
     let params = {};
     for (let i = 0; i < parts.length; i++) {
       let token = this.tokens[i];
       let part = parts[i];
-      if (token.regex.test(part)) {
+      if (token && token.regex.test(part)) {
         if (token.name) {
           params[token.name] = part;
         }
-      } else {
+      } else if (!matchesFullPathRegex){
         return false;
       }
     }
@@ -139,9 +143,6 @@ export class RouteHandler {
 /*******************************************************************************
 * @exports ClientRouter
 * @class manages the client routing on the window
-* 
-* @todo list:
-*        - Add `*` wildcard ends of routes. 
 *******************************************************************************/
 export class ClientRouter {
   constructor (options) {

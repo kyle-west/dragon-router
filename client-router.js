@@ -158,6 +158,10 @@ export class ClientRouter {
       this.subpaths[firstArg.name] = firstArg.callback;
     } else if (firstArg instanceof RouteHandler) {
       this.registerHandlers(firstArg);
+    } else if (firstArg instanceof Array) {
+      firstArg.forEach(item => {
+        this.use(item, ...actions);
+      });
     } else if (typeof firstArg === 'string') {
       this.registerHandlers(new RouteHandler(firstArg, actions));
     }

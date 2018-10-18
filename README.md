@@ -33,6 +33,15 @@ let options = {
 const router = new ClientRouter(options);
 ```
 
+### `ClientRoute.use()`
+
+  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+_Explain how `.use()` handles the following:_
+- Strings
+- Arrays
+- DerrivedSubpath
+- RouteHandler 
 
 ### Route matching
 

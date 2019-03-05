@@ -248,16 +248,16 @@ export class ClientRouter {
     if (!path) return;
     
     e.preventDefault();
-    this.evalute(new Context(path, this.routerId));
+    this.evaluate(new Context(path, this.routerId));
   }
   
   _onPopState (e) {
     if (e.state && e.state.routerId === this.routerId) {
-      this.evalute(e.state);
+      this.evaluate(e.state);
     }
   }
   
-  evalute (context, replaceState) {
+  evaluate (context, replaceState) {
     if ((context.domain && this.domain === context.domain) || !context.domain) {
       for (let i = 0; i < this.registrar.length; i++) {
         if (this.registrar[i].matches(context)) {
@@ -281,11 +281,11 @@ export class ClientRouter {
   }
 
   redirect (path) {
-    this.evalute(new Context(path, this.routerId), true);
+    this.evaluate(new Context(path, this.routerId), true);
   }
 
   navigate (path) {
-    this.evalute(new Context(path, this.routerId));
+    this.evaluate(new Context(path, this.routerId));
   }
 
   back () {

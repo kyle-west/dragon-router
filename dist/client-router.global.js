@@ -1,7 +1,7 @@
 /*******************************************************************************
 * @class stores the state of the route and used to track page state
 *******************************************************************************/
-export class Context {
+class Context {
   constructor (url = "", routerId) {
     this.url = url;
     let fullPath;
@@ -37,7 +37,7 @@ export class Context {
 /*******************************************************************************
 * @class Tokenizes a path to help with better matching and grepping strings
 *******************************************************************************/
-export class TokenizedPath {
+class TokenizedPath {
   constructor (path) {
     this.path = path;
     this.regExPath = (path[path.length -1] === '*') 
@@ -101,7 +101,7 @@ export class TokenizedPath {
 /*******************************************************************************
 * @class 
 *******************************************************************************/
-export class DerivedSubpath {
+class DerivedSubpath {
   constructor (name, callback) {
     this.name = name;
     this.callback = callback;
@@ -112,7 +112,7 @@ export class DerivedSubpath {
 /*******************************************************************************
 * @class fires a set of middleware callbacks when a Context matches its route
 *******************************************************************************/
-export class RouteHandler {
+class RouteHandler {
   constructor (path, actions) {
     this.path = path;
     this.tokenizedPath = new TokenizedPath(path.replace(/\$:/g, ':'));
@@ -144,7 +144,7 @@ export class RouteHandler {
 * @exports ClientRouter
 * @class manages the client routing on the window
 *******************************************************************************/
-export class ClientRouter {
+class ClientRouter {
   constructor (options) {
     options = options || {};
     this.routerId = options.routerId || Math.random();
@@ -295,3 +295,4 @@ export class ClientRouter {
     this.window.history.forward();
   }
 }
+Object.assign(window, {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath})

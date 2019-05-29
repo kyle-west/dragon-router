@@ -1,4 +1,4 @@
-import { ClientRouter, RouteHandler, DerivedSubpath } from '../client-router.js';
+import { ClientRouter, RouteHandler, DerivedSubpath } from '../dist/client-router.mjs';
 let router = new ClientRouter({ routerId: 'demo-router', debug: true });
 
 

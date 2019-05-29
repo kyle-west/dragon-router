@@ -1,0 +1,112 @@
+<html>
+  <head>
+    <script src="../dist/client-router.global.min.js"></script>
+    <style>
+    p {
+      margin: 0;
+    }
+    </style>
+
+    <title>DEMO PAGE (Using Global Imports)</title>
+  </head>
+  <body>
+    <small><a href="/demo/index.html">DEMO PAGE (Using ES6 Imports)</a></small>
+    <h1 id="page-title">DEMO PAGE (Using Global Imports)</h1>
+
+    <p><input type="button" value="Back" onclick="window.attachedClientRouter.back()"/> 
+     | <input type="button" value="Forward" onclick="window.attachedClientRouter.forward()"/></p>
+    <br>
+
+    <p><a href="/demo/es2015.html">/demo/es2015.html (should reload)</a></p>
+    <br>
+    <p><a href="/page">/page</a></p>
+    <p><a href="/page/">/page/</a></p>
+    <br>
+    <p><a href="/page/1">/page/1</a></p>
+    <p><a href="/page/2">/page/2</a></p>
+    <p><a href="/page/3">/page/3</a></p>
+    <br>
+    <p><a href="/about">/about</a></p>
+    <p><a href="/contact">/contact</a></p>
+    <br>
+    <p><a href="/contact/pictures">/contact/pictures</a></p>
+    <br>
+    <p><a href="/derived-subpath">/derived-subpath</a></p>
+    <p><a href="/derived-subpath/">/derived-subpath/</a></p>
+    <p><a href="/derived-subpath/blue">/derived-subpath/blue</a></p>
+    <br>
+    <p><a href="/multi-derived-subpath">/multi-derived-subpath</a></p>
+    <p><a href="/multi-derived-subpath/">/multi-derived-subpath/</a></p>
+    <p><a href="/multi-derived-subpath/abc">/multi-derived-subpath/abc</a></p>
+    <p><a href="/multi-derived-subpath/abc/s1">/multi-derived-subpath/abc/s1</a></p>
+    <p><a href="/multi-derived-subpath/abc/s1/s2">/multi-derived-subpath/abc/s1/s2</a></p>
+    <br>
+    <p><a href="/bacon/star">/bacon/star</a></p>
+    <p><a href="/thing/star/whatever">/thing/star/whatever</a></p>
+    <p><a href="/start">/start</a></p>
+    <p><a href="/start/bear">/start/bear</a></p>
+    <br>
+    <p><a href="https://google.com">google.com</a></p>
+    <p><a href="/should/404">/should/404</a></p>
+
+
+    <script>
+      let router = new ClientRouter({ routerId: 'demo-router', debug: true });
+
+      const middleware1 = (context, next) => {
+        console.log("CLIENT-SIDE ROUTING TO: ", context.path);
+        context.logged = true; // should modify the context for the next middleware
+        next();
+      };
+      const middleware2 = (context, next) => {
+        console.log('{PARAMS}:', context.params);
+        next();
+      };
+
+
+      let demoRouteHandler = new RouteHandler('/demo', [middleware1, middleware2, (context) => {
+        document.getElementById('page-title').innerHTML = "DEMO";
+      }]);
+
+      router.use(demoRouteHandler);
+
+      router.use(`/page/:num?`, middleware1, middleware2, (context) => {
+        if (context.params.num) {
+          document.getElementById('page-title').innerHTML = "Page " + context.params.num;
+        } else {
+          document.getElementById('page-title').innerHTML = "Default Page";
+        }
+      });
+
+      router.use(`/:section(about|contact)`, middleware1, middleware2, (context) => {
+        document.getElementById('page-title').innerHTML = context.params.section + " page";
+      });
+
+      router.use(`/:section(about|contact)/:subsection`, middleware1, middleware2, (context) => {
+        document.getElementById('page-title').innerHTML = context.params.section + " page | " + context.params.subsection;
+      });
+
+      router.use(new DerivedSubpath('subsection', (context) => { return 'default-path'; }))
+      router.use(`/derived-subpath/$:subsection`, middleware1, middleware2, (context) => {
+        document.getElementById('page-title').innerHTML = "DerivedSubpath: " + context.params.subsection;
+      });
+
+
+      router.use(new DerivedSubpath('first',  _ => { return Promise.resolve('abc'); }))
+      router.use(new DerivedSubpath('second', _ => { return 'sub-sub-page'; }))
+      router.use(new DerivedSubpath('third',  _ => { return 's0'; }))
+      router.use(`/multi-derived-subpath/$:first(abc|123)/$:second/$:third`, middleware1, middleware2, (context) => {
+        document.getElementById('page-title').innerHTML = "Muiltiple DerivedSubpath: " 
+        + context.params.first + " -> " 
+        + context.params.second + " -> " 
+        + context.params.third;
+      });
+
+      router.use(['/:path/star*', '/star*'], middleware1, middleware2, (context) => {
+        document.getElementById('page-title').innerHTML = context.path;
+      })
+
+      router.registerOn(window);
+    </script>  
+  </body>
+</html>

@@ -14,7 +14,7 @@ setting up your routes (See [below](#route-matching)), register the router on th
 window. 
 
 ```js
-import { ClientRouter } from '../client-router.js';
+import { ClientRouter } from 'client-router';
 const router = new ClientRouter();
 
 ... // add route handling in here

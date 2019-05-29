@@ -295,4 +295,10 @@ class ClientRouter {
     this.window.history.forward();
   }
 }
-Object.assign(window, {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath})
+
+  if (typeof module === 'object' && module.exports) {
+    module.exports = {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath}
+  } else {
+    Object.assign(window, {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath})
+  }
+

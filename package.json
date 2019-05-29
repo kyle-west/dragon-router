@@ -11,6 +11,7 @@
     "url": "git+https://github.com/kyle-west/client-router.git"
   },
   "scripts": {
-    "start": "python3 -m http.server 5000"
+    "start": "python3 -m http.server 5000",
+    "build": "sh build.sh"
   }
 }

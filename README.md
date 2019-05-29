@@ -33,19 +33,13 @@ let options = {
 const router = new ClientRouter(options);
 ```
 
-### `ClientRoute.use()`
+## `ClientRoute.use()`
 
-  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-_Explain how `.use()` handles the following:_
-- Strings
-- Arrays
-- DerrivedSubpath
-- RouteHandler 
+The `.use()` method allows us to apply matchers or behaviors to the routing. 
 
 ### Route matching
 
-Route matching follows a similar pattern as express. You can match literal routes
+Route matching follows a similar pattern as Express. You can match literal routes
 or a tokenized route that populates the `Context` with parameters.
 
 ```js
@@ -79,34 +73,29 @@ router.use('/:section(home|about)/:subSection', (context) => {
 });
 ```
 
-### Middleware
-
-Middleware is a pipeline of functions that get applied when a matching route is 
-rendered. A middleware function takes two parameters, `context`, and `next`. The `next`
-argument is a function that envokes the next middleware in the pipeline. Naturally, 
- `next()` should not be called in the last function of the pipeline.
+Additionally, you may apply an array of matchers to a given handler.
 
 ```js
-let loggingMiddleware = (context, next) => {
-  console.log('[ClientRouter]: navigating to ', context.path)
-  next(); 
-}
+let matchingRoutes = ['/home/:subSection', '/about/:subSection'];
 
-...
-
-router.use('/:view', loggingMiddleware, renderYourAboutPageCB);
+router.use(matchingRoutes, (context) => {
+  // your code here
+});
 ```
 
-## Optional Subpaths
+#### Optional Subpaths
 
-    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TODO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Additional syntax of matchers includes `*` and `?` postfixes to sections.
 
-_Explain what `?` does_
+The `*` postfix (e.g. `/your/route*`) will match any incoming route that is 
+prefixed with the text before the `*` character.
 
-_Explain what `*` does_
+The `?` postfix (e.g. `/your/:route?`) allows that section of the route to be 
+optional. Unlike [Derived Subpaths](#derived-subpaths), these section values are
+evaluated in the final callback of the middleware pipeline. 
 
 
-## Derived Subpaths
+### Derived Subpaths
 
 A `DerivedSubpath` allows for a route to specify default values derived from a 
 given callback. The callback for the DerivedSubpath can return an `async` object 
@@ -147,3 +136,37 @@ router.use('/page/$:section(main|about|contact)/$:subsection', renderPageCB);
 ```
 
 The later being easier to read and understand by the developer than the former.
+
+### Middleware
+
+Middleware is a pipeline of functions that get applied when a matching route is 
+rendered. A middleware function takes two parameters, `context`, and `next`. The `next`
+argument is a function that envokes the next middleware in the pipeline. Naturally, 
+ `next()` should not be called in the last function of the pipeline.
+
+```js
+let loggingMiddleware = (context, next) => {
+  console.log('[ClientRouter]: navigating to ', context.path)
+  next(); 
+}
+
+...
+
+router.use('/:view', loggingMiddleware, renderYourAboutPageCB);
+```
+
+### `RouteHandler`
+
+If you wish to make a particular handler reusable, you may form it as a `RouteHandler` for your convenience.
+
+The constructor of `RouteHandler` takes two arguments: 
+- [Matchers](#route-matching)
+- And array of [middleware handlers](#middleware)
+
+```js
+let handler = new RouteHandler('/demo', [middleware1, middleware2, (context) => {
+  // your handle here
+}]);
+
+router.use(handler);
+```

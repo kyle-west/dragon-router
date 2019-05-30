@@ -151,6 +151,9 @@ export class ClientRouter {
     this.debug = !!(options.debug);
     this.registrar = [];
     this.subpaths = {};
+    if (options.registerOn) {
+      this.registerOn(options.registerOn)
+    }
   }
 
   use (firstArg, ...actions) {
@@ -206,7 +209,29 @@ export class ClientRouter {
       let remainingRoute = route.replace('$:', ':');
       if (remainingRoute.includes('$:')) {
         this.registerHandlers(new RouteHandler(remainingRoute), true)
-      }
+      } 
+      let afterSections = rest.split('/').slice(1)
+      let routeWithRemovedSection = [before, ...afterSections].join('/');
+      this.registrar.push(new RouteHandler(routeWithRemovedSection, [async (context) => {
+        try {
+          let query = (context.search) ? ('?' + context.search) : '';
+          let replacedSection = await this.subpaths[dPath](context);
+          let remainingSections = await Promise.all(afterSections.map(s => {
+            let matcher = s.match(/[$]?:/)
+            if (matcher) {
+              let sectionName = s.replace(matcher[0], '').split('(')[0];
+              if (matcher[0].startsWith('$')) {
+                return this.subpaths[sectionName](context)
+              } else {
+                return context.params[sectionName] || s
+              }
+            }
+            return s
+          }))
+          let forwardPath = `${[before, replacedSection, ...remainingSections].join('/')}${query}`;
+          this.redirect(forwardPath);
+        } catch (err) { throw err; }
+      }]));
     }
 
     !isRecursive && this.registrar.push(routeHandle);

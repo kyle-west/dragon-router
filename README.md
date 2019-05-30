@@ -22,12 +22,29 @@ const router = new ClientRouter();
 router.registerOn(window);    
 ```
 
+If you are using CommonJS, you may import the proper version from the `/dist` folder.
+
+```js
+const {ClientRouter} = require('client-router/dist/client-router.min.js')
+```
+
+Likewise, you can include it in your HTML from a `script` tag.
+
+```html
+<script src="/path/to/client-router/dist/client-router.min.js"></script>
+
+OR
+
+<script type="module" src="/path/to/client-router/dist/client-router.module.js"></script>
+```
+
 ### Options
 
 ```js
 let options = {
   routerId: 'my-cool-client-router', // unique identifier between apps
   debug: true                        // show additional logging info
+  registerOn: window                 // bind to the client's browser immediately
 }
 
 const router = new ClientRouter(options);
@@ -115,7 +132,7 @@ router.use(defaultSection);
 router.use('/page/$:section(main|about|contact)', renderPageSectionCB)
 ```
 
-By this pinciple, the following are equivilant:
+By this principle, the following are equivalent:
 
 ```js
 router.use('/page', (context) => {

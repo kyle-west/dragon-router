@@ -1,5 +1,9 @@
 {
   "bowerFiles": [
-    "client-router.js"
+    "/components/client-router/index.js",
+    "/components/client-router/client-router.js",
+    "/components/client-router/dist/client-router.module.js",
+    "/components/client-router/dist/client-router.js",
+    "/components/client-router/dist/client-router.min.js"
   ]
 }

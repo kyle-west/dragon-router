@@ -190,6 +190,15 @@ let handler = new RouteHandler('/demo', [middleware1, middleware2, (context) => 
 router.use(handler);
 ```
 
+# Removing the Router
+
+In the event that you wish to remove the router from your application, you will need to first unregister it before deleting. 
+
+```js
+router.unregister()
+delete router
+```
+
 # Using with ReactJS
 
 With [Hooks](https://reactjs.org/docs/hooks-intro.html), integration into ReactJS is pretty simple. Below is an example on how to do so.

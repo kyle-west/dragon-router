@@ -241,14 +241,24 @@ class ClientRouter {
     if (!window.attachedClientRouter) {
       this.domain = new Context(window.location.href).domain;
       let onclick = window.document.ontouchstart ? 'touchstart' : 'click';
-      window.addEventListener(onclick, this._onClick.bind(this));
-      window.addEventListener('popstate', this._onPopState.bind(this));
+      this._onClick = this._onClick.bind(this)
+      this._onPopState = this._onPopState.bind(this)
+      window.addEventListener(onclick, this._onClick);
+      window.addEventListener('popstate', this._onPopState);
       window.attachedClientRouter = this;
       this.window = window;
       this.debug && console.log(`Router {${this.routerId}} registered to`, window, this);
     } else {
       throw new Error(`ClilentRouter::registerOn(): a router is already attached: ClientRouter {#${window.attachedClientRouter.routerId}}`)
     }
+  }
+
+  unregister () {
+    let onclick = window.document.ontouchstart ? 'touchstart' : 'click';
+    window.removeEventListener(onclick, this._onClick);
+    window.removeEventListener('popstate', this._onPopState);
+    this.window.attachedClientRouter = null;
+    delete this.window.attachedClientRouter;
   }
 
   _onClick (e) {

@@ -80,5 +80,5 @@
     router.navigate('/test/this-part-was-filled-in/the-rest-of-the-path')
   });
 
-  delete window.attachedClientRouter
+  router.unregister()
 })

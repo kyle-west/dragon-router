@@ -1,5 +1,7 @@
 # ClientRouter
 
+![](https://travis-ci.com/kyle-west/client-router.svg?branch=master)
+
 `ClientRouter` is an ExpressJS like client side router. It grabs a hold on the 
 url when the user uses a link to navigate. This is intended to help progressive 
 web apps manage the frontend independant of a server call. It uses the browser's
@@ -186,4 +188,32 @@ let handler = new RouteHandler('/demo', [middleware1, middleware2, (context) => 
 }]);
 
 router.use(handler);
+```
+
+# Using with ReactJS
+
+With [Hooks](https://reactjs.org/docs/hooks-intro.html), integration into ReactJS is pretty simple. Below is an example on how to do so.
+
+```jsx
+// Import our router and the pages we want to client render
+import React from 'react'
+import { ClientRouter } from 'client-router'
+import { DefaultPage, ExamplePage } from '../my-client-rendered-pages'
+
+// This function sets up the router to select a page to render based off of the current path
+function attachRouter (updatePage) {
+  return () => {
+    const router = new ClientRouter({ registerOn: window })
+    router.use('/example', ctx => updatePage(<ExamplePage context={ctx} />))
+    router.use('*',        ctx => updatePage(<DefaultPage context={ctx} />))
+  }
+}
+
+// Now our app conditionally renders pages based off of the route we are on
+export default function App ({}) {
+  const [page, updatePage] = React.useState(<DefaultPage />)
+  React.useEffect(attachRouter(updatePage), [])
+
+  return <div>{page}</div>
+}
 ```

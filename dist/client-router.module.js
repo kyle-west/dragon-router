@@ -332,4 +332,8 @@ export class ClientRouter {
   forward () {
     this.window.history.forward();
   }
+
+  start () {
+    this.evaluate(new Context(this.window.location.href, this.routerId));
+  }
 }

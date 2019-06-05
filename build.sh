@@ -44,7 +44,7 @@ reportSize () {
 
 ###################################################################################
 
-if [ "$1" == "build-only-if-needed" ]; then 
+if [ "$1" = 'build-only-if-needed' ]; then 
   echo "Checking if we need to run the build..."
   if [[ ./client-router.js -nt ./dist/client-router.module.js ]]; then
     echo "./client-router.js is dirty, running build..."

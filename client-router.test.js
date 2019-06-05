@@ -81,4 +81,35 @@
   });
 
   router.unregister()
+
+  const router2 = new ClientRouter({ basePath: '/test/base-path', registerOn: window });
+
+  test(`${distFile} :: We can use derived subpaths`, () => {
+    let calledTimes = 0;
+
+    router2.use('/', (context) => {
+      switch (calledTimes) {
+        case 0: expect(context.path).toBe('/test/base-path'); break;
+        case 1: expect(context.path).toBe('/test/base-path/'); break;
+      } 
+      calledTimes += 1;
+    })
+    router2.use('/:test(test1|test2)/:subsection?', (context) => {
+      switch (calledTimes) {
+        case 2: expect(context.path).toBe('/test/base-path/test1'); break;
+        case 3: expect(context.path).toBe('/test/base-path/test2/subsectionA'); break;
+        case 4: expect(context.path).toBe('/test/base-path/test2/subsectionB'); break;
+      } 
+      calledTimes += 1;
+    })
+  
+    router2.navigate('/test/base-path')
+    router2.navigate('/test/base-path/')
+    router2.navigate('/test/base-path/test1')
+    router2.navigate('/test/base-path/test2/subsectionA')
+    router2.navigate('/test/base-path/test2/subsectionB')
+    expect(calledTimes).toBe(5)
+  });
+
+  router2.unregister()
 })

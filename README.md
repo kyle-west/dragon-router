@@ -44,9 +44,10 @@ OR
 
 ```js
 let options = {
-  routerId: 'my-cool-client-router', // unique identifier between apps
-  debug: true                        // show additional logging info
-  registerOn: window                 // bind to the client's browser immediately
+  basePath: '/my-app/base/route',    // mount the router off of a specific path     [default is '/']
+  routerId: 'my-cool-client-router', // unique identifier between apps              [default is a random number]
+  debug: true                        // show additional logging info                [default is false]
+  registerOn: window                 // bind to the client's browser immediately    [if not given, `router.registerOn(...)` must be called separately]
 }
 
 const router = new ClientRouter(options);

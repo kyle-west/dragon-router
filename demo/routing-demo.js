@@ -1,5 +1,9 @@
 import { ClientRouter, RouteHandler, DerivedSubpath } from '../dist/client-router.module.js';
-let router = new ClientRouter({ routerId: 'demo-router', debug: true });
+let router = new ClientRouter({
+  basePath: '/demo', 
+  routerId: 'demo-router', 
+  debug: true,
+});
 
 
 const middleware1 = (context, next) => {

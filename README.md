@@ -104,6 +104,15 @@ router.use(matchingRoutes, (context) => {
 });
 ```
 
+Full `RegExp` matchers are also supported.
+
+```js
+router.use(/^\/some\/fancy\/regular\/expression$/, (context) => {
+  // your code here
+});
+```
+
+
 #### Optional Subpaths
 
 Additional syntax of matchers includes `*` and `?` postfixes to sections.

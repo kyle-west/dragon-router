@@ -59,4 +59,9 @@ router.use(['/:path/star*', '/star*'], middleware1, middleware2, (context) => {
   document.getElementById('page-title').innerHTML = context.path;
 })
 
+router.use(/^\/some\/(regex|fancy)\/path.*$/, (context) => {
+  console.log("using RegExp to match:", context.path)
+  document.getElementById('page-title').innerHTML = context.path;
+})
+
 router.registerOn(window);

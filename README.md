@@ -21,7 +21,8 @@ const router = new ClientRouter();
 
 ... // add route handling in here
 
-router.registerOn(window);    
+router.registerOn(window);
+router.start() // run this function after you have established routing rules, so the router knows it can immediately apply them
 ```
 
 If you are using CommonJS, you may import the proper version from the `/dist` folder.
@@ -216,6 +217,7 @@ function attachRouter (updatePage) {
     const router = new ClientRouter({ registerOn: window })
     router.use('/example', ctx => updatePage(<ExamplePage context={ctx} />))
     router.use('*',        ctx => updatePage(<DefaultPage context={ctx} />))
+    router.start()
   }
 }
 

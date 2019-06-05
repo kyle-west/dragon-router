@@ -120,7 +120,8 @@ export class RouteHandler {
   }
 
   matches (context) {
-    let matches = this.tokenizedPath.matches(context.path);
+    let path = context.path.replace(new RegExp(`^${context.basePath}`), '')
+    let matches = this.tokenizedPath.matches(path);
     if (matches !== false) {
       context.params = matches;
       this.fireActions(context);
@@ -150,7 +151,8 @@ export class ClientRouter {
     this.routerId = options.routerId || Math.random();
     this.debug = !!(options.debug);
     this.registrar = [];
-    this.subpaths = {};
+    this.subPaths = {};
+    this.basePath = options.basePath || '';
     if (options.registerOn) {
       this.registerOn(options.registerOn)
     }
@@ -158,7 +160,7 @@ export class ClientRouter {
 
   use (firstArg, ...actions) {
     if (firstArg instanceof DerivedSubpath) {
-      this.subpaths[firstArg.name] = firstArg.callback;
+      this.subPaths[firstArg.name] = firstArg.callback;
     } else if (firstArg instanceof RouteHandler) {
       this.registerHandlers(firstArg);
     } else if (firstArg instanceof Array) {
@@ -201,7 +203,7 @@ export class ClientRouter {
           let lastChar = context.path.length-1;
           let query = (context.search) ? ('?' + context.search) : '';
           let base = (context.path[lastChar] === '/') ? context.path.substring(0, lastChar) : context.path; 
-          let forwardPath = `${base}/${await this.subpaths[dPath](context)}${query}`;
+          let forwardPath = `${base}/${await this.subPaths[dPath](context)}${query}`;
           this.redirect(forwardPath);
         } catch (err) { throw err; }
       }]));
@@ -215,13 +217,13 @@ export class ClientRouter {
       this.registrar.push(new RouteHandler(routeWithRemovedSection, [async (context) => {
         try {
           let query = (context.search) ? ('?' + context.search) : '';
-          let replacedSection = await this.subpaths[dPath](context);
+          let replacedSection = await this.subPaths[dPath](context);
           let remainingSections = await Promise.all(afterSections.map(s => {
             let matcher = s.match(/[$]?:/)
             if (matcher) {
               let sectionName = s.replace(matcher[0], '').split('(')[0];
               if (matcher[0].startsWith('$')) {
-                return this.subpaths[sectionName](context)
+                return this.subPaths[sectionName](context)
               } else {
                 return context.params[sectionName] || s
               }
@@ -241,14 +243,24 @@ export class ClientRouter {
     if (!window.attachedClientRouter) {
       this.domain = new Context(window.location.href).domain;
       let onclick = window.document.ontouchstart ? 'touchstart' : 'click';
-      window.addEventListener(onclick, this._onClick.bind(this));
-      window.addEventListener('popstate', this._onPopState.bind(this));
+      this._onClick = this._onClick.bind(this)
+      this._onPopState = this._onPopState.bind(this)
+      window.addEventListener(onclick, this._onClick);
+      window.addEventListener('popstate', this._onPopState);
       window.attachedClientRouter = this;
       this.window = window;
       this.debug && console.log(`Router {${this.routerId}} registered to`, window, this);
     } else {
       throw new Error(`ClilentRouter::registerOn(): a router is already attached: ClientRouter {#${window.attachedClientRouter.routerId}}`)
     }
+  }
+
+  unregister () {
+    let onclick = window.document.ontouchstart ? 'touchstart' : 'click';
+    window.removeEventListener(onclick, this._onClick);
+    window.removeEventListener('popstate', this._onPopState);
+    this.window.attachedClientRouter = null;
+    delete this.window.attachedClientRouter;
   }
 
   _onClick (e) {
@@ -283,6 +295,7 @@ export class ClientRouter {
   
   evaluate (context, replaceState) {
     if ((context.domain && this.domain === context.domain) || !context.domain) {
+      context.basePath = this.basePath;
       for (let i = 0; i < this.registrar.length; i++) {
         if (this.registrar[i].matches(context)) {
           this.pushState(context, replaceState);

@@ -4,11 +4,11 @@ buildAllTheThings () {
 
   sed -e 's#export ##g' client-router.js > dist/client-router.js
   echo "
-    if (typeof module === 'object' && module.exports) {
-      module.exports = {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath}
-    } else {
-      Object.assign(window, {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath})
-    }
+if (typeof module === 'object' && module.exports) {
+  module.exports = {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath}
+} else {
+  Object.assign(window, {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath})
+}
   " >> dist/client-router.js
 
   npx babel-minify dist/client-router.js --out-file dist/client-router.min.js

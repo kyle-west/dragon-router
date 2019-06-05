@@ -84,7 +84,7 @@
 
   const router2 = new ClientRouter({ basePath: '/test/base-path', registerOn: window });
 
-  test(`${distFile} :: We can use derived subpaths`, () => {
+  test(`${distFile} :: We can use mount our app on a base path`, () => {
     let calledTimes = 0;
 
     router2.use('/', (context) => {
@@ -112,4 +112,38 @@
   });
 
   router2.unregister()
+
+  const router3 = new ClientRouter({registerOn: window, routerId: 'test'});
+
+  test(`${distFile} :: We can use global middleware`, () => {
+    let calledTimes = 0;
+    router3.use(
+      (ctx, next) => {
+        expect(ctx.beenThroughGlobalMiddleware).toBe(undefined)
+        calledTimes += 1;
+        next()
+      },
+      (ctx, next) => {
+        ctx.beenThroughGlobalMiddleware = true
+        calledTimes += 1;
+        next()
+      },
+      (ctx, next) => {
+        expect(ctx.beenThroughGlobalMiddleware).toBe(true)
+        calledTimes += 1;
+        next()
+      }
+      )
+      
+      router3.use('/test/global/middleware', (ctx) => {
+        expect(ctx.beenThroughGlobalMiddleware).toBe(true)
+        calledTimes += 1;
+      })
+      
+    router3.navigate('/test/global/middleware')
+    expect(calledTimes).toBe(4)
+  });
+
+  router3.unregister()
+
 })

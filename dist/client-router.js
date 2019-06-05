@@ -124,10 +124,9 @@ class RouteHandler {
     let matches = this.tokenizedPath.matches(path);
     if (matches !== false) {
       context.params = matches;
-      this.fireActions(context);
-      return true;
+      return [(c) => this.fireActions(c), context];
     } else {
-      return false;
+      return [];
     }
   }
 
@@ -151,10 +150,19 @@ class ClientRouter {
     this.routerId = options.routerId || Math.random();
     this.debug = !!(options.debug);
     this.registrar = [];
+    this.globalActions = [];
     this.subPaths = {};
     this.basePath = options.basePath || '';
+
     if (options.registerOn) {
       this.registerOn(options.registerOn)
+    }
+
+    if (this.debug) {
+      this.globalActions.push((ctx, next) => {
+        console.log(ctx),
+        next()
+      })
     }
   }
 
@@ -163,6 +171,8 @@ class ClientRouter {
       this.subPaths[firstArg.name] = firstArg.callback;
     } else if (firstArg instanceof RouteHandler) {
       this.registerHandlers(firstArg);
+    } else if (firstArg instanceof Function) { // middleware
+      this.globalActions = [...this.globalActions, firstArg, ...actions];
     } else if (firstArg instanceof Array) {
       firstArg.forEach(item => {
         this.use(item, ...actions);
@@ -297,8 +307,21 @@ class ClientRouter {
     if ((context.domain && this.domain === context.domain) || !context.domain) {
       context.basePath = this.basePath;
       for (let i = 0; i < this.registrar.length; i++) {
-        if (this.registrar[i].matches(context)) {
-          this.pushState(context, replaceState);
+        let [fireMatchingActions, ctx] = this.registrar[i].matches(context)
+        if (fireMatchingActions) {
+          if (this.debug) {
+            console.group(`ClientRouter {${this.routerId}}::[route match]: ${ctx.path}`);
+            if (this.globalActions.length > 1) console.log('Global Middleware:', this.globalActions)
+            console.log(this.registrar[i])
+          }
+          
+          this.fireGlobalActions(ctx);
+          fireMatchingActions(ctx);
+          this.pushState(ctx, replaceState);
+          
+          if (this.debug) {
+            console.groupEnd(`ClientRouter {${this.routerId}}::[route match]: ${ctx.path}`);
+          }
           return;
         }
       }
@@ -315,6 +338,15 @@ class ClientRouter {
         this.window.history.pushState(context, null, context.path)
       }
     }
+  }
+
+  fireGlobalActions (context) {
+    let idx = 0;
+    let next = () => {
+      let fn = this.globalActions[idx++];
+      fn && fn(context, next);
+    }
+    next();
   }
 
   redirect (path) {
@@ -338,9 +370,9 @@ class ClientRouter {
   }
 }
 
-    if (typeof module === 'object' && module.exports) {
-      module.exports = {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath}
-    } else {
-      Object.assign(window, {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath})
-    }
+if (typeof module === 'object' && module.exports) {
+  module.exports = {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath}
+} else {
+  Object.assign(window, {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath})
+}
   

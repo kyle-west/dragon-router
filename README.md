@@ -176,6 +176,14 @@ let loggingMiddleware = (context, next) => {
 router.use('/:view', loggingMiddleware, renderYourAboutPageCB);
 ```
 
+Alternatively, functions that are given to `router.use(...)` without a matcher are added as global middleware, and ran for every matching route.
+
+```js
+router.use(loggingMiddleware);
+router.use(someOtherMiddleware1, someOtherMiddleware2); // accepts multiple middleware in one `use` statement
+```
+
+
 ### `RouteHandler`
 
 If you wish to make a particular handler reusable, you may form it as a `RouteHandler` for your convenience.

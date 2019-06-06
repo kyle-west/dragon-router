@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script src="../dist/client-router.min.js"></script>
+    <script src="../dist/dragon-router.min.js"></script>
     <style>
     p {
       margin: 0;
@@ -13,8 +13,8 @@
     <small><a href="/demo/index.html">DEMO PAGE (Using ES6 Imports)</a></small>
     <h1 id="page-title">DEMO PAGE (Using Global Imports)</h1>
 
-    <p><input type="button" value="Back" onclick="window.attachedClientRouter.back()"/> 
-     | <input type="button" value="Forward" onclick="window.attachedClientRouter.forward()"/></p>
+    <p><input type="button" value="Back" onclick="window.attachedRouter.back()"/> 
+     | <input type="button" value="Forward" onclick="window.attachedRouter.forward()"/></p>
     <br>
 
     <p><a href="/demo/es2015.html">/demo/es2015.html (should reload)</a></p>
@@ -55,7 +55,7 @@
 
 
     <script>
-      let router = new ClientRouter({ routerId: 'demo-router', debug: true });
+      let router = new Router({ routerId: 'demo-router', debug: true });
 
       const middleware1 = (context, next) => {
         console.log("CLIENT-SIDE ROUTING TO: ", context.path);

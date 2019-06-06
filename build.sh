@@ -2,17 +2,17 @@ buildAllTheThings () {
   rm -rf ./dist
   mkdir ./dist
 
-  sed -e 's#export ##g' client-router.js > dist/client-router.js
+  sed -e 's#export ##g' dragon-router.js > dist/dragon-router.js
   echo "
 if (typeof module === 'object' && module.exports) {
-  module.exports = {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath}
+  module.exports = {Router, Context, DerivedSubpath, RouteHandler, TokenizedPath}
 } else {
-  Object.assign(window, {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath})
+  Object.assign(window, {Router, Context, DerivedSubpath, RouteHandler, TokenizedPath})
 }
-  " >> dist/client-router.js
+  " >> dist/dragon-router.js
 
-  npx babel-minify dist/client-router.js --out-file dist/client-router.min.js
-  cp client-router.js dist/client-router.module.js
+  npx babel-minify dist/dragon-router.js --out-file dist/dragon-router.min.js
+  cp dragon-router.js dist/dragon-router.module.js
 }
 
 filesize () {
@@ -20,9 +20,9 @@ filesize () {
 }
 
 reportSize () {
-  Msize=$(filesize client-router.js)
-  Gsize=$(filesize dist/client-router.js)
-  GminS=$(filesize dist/client-router.min.js)
+  Msize=$(filesize dragon-router.js)
+  Gsize=$(filesize dist/dragon-router.js)
+  GminS=$(filesize dist/dragon-router.min.js)
 
   # Table Alignment
   a="| %-30s | %6s |\n"
@@ -31,11 +31,11 @@ reportSize () {
   echo     "+--------------------------------+--------+"
   echo     "|             FILE               |  SIZE  |"
   echo     "+--------------------------------|--------+"
-  printf "$a" "client-router.js"              $Msize
+  printf "$a" "dragon-router.js"              $Msize
   printf "$a" "dist/"                         ""
-  printf "$a" "  client-router.module.js"     $Msize
-  printf "$a" "  client-router.js"            $Gsize
-  printf "$a" "  client-router.min.js"        $GminS
+  printf "$a" "  dragon-router.module.js"     $Msize
+  printf "$a" "  dragon-router.js"            $Gsize
+  printf "$a" "  dragon-router.min.js"        $GminS
   echo     "+--------------------------------+--------+"
   echo;
   echo "  min file compression: $(expr \( $GminS \* 100 \) / $Msize)%"
@@ -46,11 +46,11 @@ reportSize () {
 
 if [ "$1" = 'build-only-if-needed' ]; then 
   echo "Checking if we need to run the build..."
-  if [ ./client-router.js -nt ./dist/client-router.module.js ]; then
-    echo "'client-router.js' is dirty, running build..."
+  if [ ./dragon-router.js -nt ./dist/dragon-router.module.js ]; then
+    echo "'dragon-router.js' is dirty, running build..."
     buildAllTheThings
   else
-    echo "'client-router.js' is clean, no need to run build."
+    echo "'dragon-router.js' is clean, no need to run build."
   fi
 else
   buildAllTheThings

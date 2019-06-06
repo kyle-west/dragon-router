@@ -1,23 +1,23 @@
-# ClientRouter
+# 🐉 Dragon Router
 
-![](https://travis-ci.com/kyle-west/client-router.svg?branch=master)
+![](https://travis-ci.com/kyle-west/dragon-router.svg?branch=master)
 
-`ClientRouter` is an ExpressJS like client side router. It grabs a hold on the 
+`Router` is an ExpressJS like client side router. It grabs a hold on the 
 url when the user uses a link to navigate. This is intended to help progressive 
-web apps manage the frontend independant of a server call. It uses the browser's
-`history` API to control the pushing and poping of the page state.
+web apps manage the frontend independent of a server call. It uses the browser's
+`history` API to control the pushing and popping of the page state.
 
 It is also a work in progress. Stay tuned for better docs.
 
 ## Setup and usage
 
-`ClientRouter` is an es6 class. Import it like you would any other module. After 
+`Router` is an es6 class. Import it like you would any other module. After 
 setting up your routes (See [below](#route-matching)), register the router on the
 window. 
 
 ```js
-import { ClientRouter } from 'client-router';
-const router = new ClientRouter();
+import { Router } from 'dragon-router';
+const router = new Router();
 
 ... // add route handling in here
 
@@ -28,17 +28,17 @@ router.start() // run this function after you have established routing rules, so
 If you are using CommonJS, you may import the proper version from the `/dist` folder.
 
 ```js
-const {ClientRouter} = require('client-router/dist/client-router.min.js')
+const {Router} = require('dragon-router/dist/dragon-router.min.js')
 ```
 
 Likewise, you can include it in your HTML from a `script` tag.
 
 ```html
-<script src="/path/to/client-router/dist/client-router.min.js"></script>
+<script src="/path/to/dragon-router/dist/dragon-router.min.js"></script>
 
 OR
 
-<script type="module" src="/path/to/client-router/dist/client-router.module.js"></script>
+<script type="module" src="/path/to/dragon-router/dist/dragon-router.module.js"></script>
 ```
 
 ### Options
@@ -46,15 +46,15 @@ OR
 ```js
 let options = {
   basePath: '/my-app/base/route',    // mount the router off of a specific path     [default is '/']
-  routerId: 'my-cool-client-router', // unique identifier between apps              [default is a random number]
+  routerId: 'my-cool-dragon-router', // unique identifier between apps              [default is a random number]
   debug: true                        // show additional logging info                [default is false]
   registerOn: window                 // bind to the client's browser immediately    [if not given, `router.registerOn(...)` must be called separately]
 }
 
-const router = new ClientRouter(options);
+const router = new Router(options);
 ```
 
-## `ClientRoute.use()`
+## `Router.use()`
 
 The `.use()` method allows us to apply matchers or behaviors to the routing. 
 
@@ -176,7 +176,7 @@ argument is a function that envokes the next middleware in the pipeline. Natural
 
 ```js
 let loggingMiddleware = (context, next) => {
-  console.log('[ClientRouter]: navigating to ', context.path)
+  console.log('[Router]: navigating to ', context.path)
   next(); 
 }
 
@@ -225,13 +225,13 @@ With [Hooks](https://reactjs.org/docs/hooks-intro.html), integration into ReactJ
 ```jsx
 // Import our router and the pages we want to client render
 import React from 'react'
-import { ClientRouter } from 'client-router'
+import { Router } from 'dragon-router'
 import { DefaultPage, ExamplePage } from '../my-client-rendered-pages'
 
 // This function sets up the router to select a page to render based off of the current path
 function attachRouter (updatePage) {
   return () => {
-    const router = new ClientRouter({ registerOn: window })
+    const router = new Router({ registerOn: window })
     router.use('/example', ctx => updatePage(<ExamplePage context={ctx} />))
     router.use('*',        ctx => updatePage(<DefaultPage context={ctx} />))
     router.start()

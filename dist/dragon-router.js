@@ -155,10 +155,10 @@ class RouteHandler {
 }
 
 /*******************************************************************************
-* @exports ClientRouter
+* @exports Router
 * @class manages the client routing on the window
 *******************************************************************************/
-class ClientRouter {
+class Router {
   constructor (options) {
     options = options || {};
     this.routerId = options.routerId || Math.random();
@@ -194,7 +194,7 @@ class ClientRouter {
     } else if (typeof firstArg === 'string' || firstArg instanceof RegExp) {
       this.registerHandlers(new RouteHandler(firstArg, actions));
     } else {
-      console.error(`ClientRouter::use - first argument of type not supported:`, firstArg)
+      console.error(`Router::use - first argument of type not supported:`, firstArg)
     }
   }
   
@@ -271,18 +271,18 @@ class ClientRouter {
   }
 
   registerOn(window) {
-    if (!window.attachedClientRouter) {
+    if (!window.attachedRouter) {
       this.domain = new Context(window.location.href).domain;
       let onclick = window.document.ontouchstart ? 'touchstart' : 'click';
       this._onClick = this._onClick.bind(this)
       this._onPopState = this._onPopState.bind(this)
       window.addEventListener(onclick, this._onClick);
       window.addEventListener('popstate', this._onPopState);
-      window.attachedClientRouter = this;
+      window.attachedRouter = this;
       this.window = window;
       this.debug && console.log(`Router {${this.routerId}} registered to`, window, this);
     } else {
-      throw new Error(`ClilentRouter::registerOn(): a router is already attached: ClientRouter {#${window.attachedClientRouter.routerId}}`)
+      throw new Error(`ClilentRouter::registerOn(): a router is already attached: Router {#${window.attachedRouter.routerId}}`)
     }
   }
 
@@ -290,8 +290,8 @@ class ClientRouter {
     let onclick = window.document.ontouchstart ? 'touchstart' : 'click';
     window.removeEventListener(onclick, this._onClick);
     window.removeEventListener('popstate', this._onPopState);
-    this.window.attachedClientRouter = null;
-    delete this.window.attachedClientRouter;
+    this.window.attachedRouter = null;
+    delete this.window.attachedRouter;
   }
 
   _onClick (e) {
@@ -331,7 +331,7 @@ class ClientRouter {
         let [fireMatchingActions, ctx] = this.registrar[i].matches(context)
         if (fireMatchingActions) {
           if (this.debug) {
-            console.group(`ClientRouter {${this.routerId}}::[route match]: ${ctx.path}`);
+            console.group(`Router {${this.routerId}}::[route match]: ${ctx.path}`);
             if (this.globalActions.length > 1) console.log('Global Middleware:', this.globalActions)
             console.log(this.registrar[i])
           }
@@ -341,7 +341,7 @@ class ClientRouter {
           this.pushState(ctx, replaceState);
           
           if (this.debug) {
-            console.groupEnd(`ClientRouter {${this.routerId}}::[route match]: ${ctx.path}`);
+            console.groupEnd(`Router {${this.routerId}}::[route match]: ${ctx.path}`);
           }
           return;
         }
@@ -392,8 +392,8 @@ class ClientRouter {
 }
 
 if (typeof module === 'object' && module.exports) {
-  module.exports = {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath}
+  module.exports = {Router, Context, DerivedSubpath, RouteHandler, TokenizedPath}
 } else {
-  Object.assign(window, {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath})
+  Object.assign(window, {Router, Context, DerivedSubpath, RouteHandler, TokenizedPath})
 }
   

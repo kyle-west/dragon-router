@@ -1,9 +1,9 @@
 {
   "bowerFiles": [
-    "/components/client-router/index.js",
-    "/components/client-router/client-router.js",
-    "/components/client-router/dist/client-router.module.js",
-    "/components/client-router/dist/client-router.js",
-    "/components/client-router/dist/client-router.min.js"
+    "/components/dragon-router/index.js",
+    "/components/dragon-router/dragon-router.js",
+    "/components/dragon-router/dist/dragon-router.module.js",
+    "/components/dragon-router/dist/dragon-router.js",
+    "/components/dragon-router/dist/dragon-router.min.js"
   ]
 }

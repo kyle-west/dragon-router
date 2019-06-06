@@ -1,5 +1,5 @@
 {
-  "name": "client-router",
+  "name": "dragon-router",
   "version": "1.0.0",
   "description": "Express-like Client Side Routing Manager",
   "author": {
@@ -9,7 +9,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kyle-west/client-router.git"
+    "url": "git+https://github.com/kyle-west/dragon-router.git"
   },
   "scripts": {
     "start": "http-server ./ -p 5000",

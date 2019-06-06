@@ -8,16 +8,16 @@ function wait (cb, time) {
 }
 
 
-['./dist/client-router', './dist/client-router.min'].forEach(distFile => {
-  const {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath} = require(distFile)
-  const router = new ClientRouter({registerOn: window});
+['./dist/dragon-router', './dist/dragon-router.min'].forEach(distFile => {
+  const {Router, Context, DerivedSubpath, RouteHandler, TokenizedPath} = require(distFile)
+  const router = new Router({registerOn: window});
   
   const middleware1 = (ctx, next) => { ctx.params.middleware1 = true; next(); }
   const middleware2 = (ctx, next) => { ctx.params.middleware2 = true; next(); }
   const middleware3 = (ctx, next) => { ctx.params.middleware3 = true; next(); }
   
   test(`${distFile} :: We can get all the class definitions out of the package`, () => {
-    [ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath].forEach(classDefinition => {
+    [Router, Context, DerivedSubpath, RouteHandler, TokenizedPath].forEach(classDefinition => {
       expect(classDefinition).toBeDefined();
     });
   });
@@ -131,7 +131,7 @@ function wait (cb, time) {
 
   router.unregister()
 
-  const router2 = new ClientRouter({ basePath: '/test/base-path', registerOn: window });
+  const router2 = new Router({ basePath: '/test/base-path', registerOn: window });
 
   test(`${distFile} :: We can use mount our app on a base path`, () => {
     let calledTimes = 0;
@@ -162,7 +162,7 @@ function wait (cb, time) {
 
   router2.unregister()
 
-  const router3 = new ClientRouter({registerOn: window, routerId: 'test'});
+  const router3 = new Router({registerOn: window, routerId: 'test'});
 
   test(`${distFile} :: We can use global middleware`, () => {
     let calledTimes = 0;

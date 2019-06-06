@@ -7,7 +7,9 @@ url when the user uses a link to navigate. This is intended to help progressive
 web apps manage the frontend independent of a server call. It uses the browser's
 `history` API to control the pushing and popping of the page state.
 
-It is also a work in progress. Stay tuned for better docs.
+```sh
+npm install --save dragon-router
+```
 
 ## Setup and usage
 

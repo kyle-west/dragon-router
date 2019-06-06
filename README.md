@@ -2,7 +2,7 @@
 
 ![](https://travis-ci.com/kyle-west/dragon-router.svg?branch=master)
 
-`Router` is an ExpressJS like client side router. It grabs a hold on the 
+Dragon Router is an ExpressJS-like client side router. It grabs a hold on the 
 url when the user uses a link to navigate. This is intended to help progressive 
 web apps manage the frontend independent of a server call. It uses the browser's
 `history` API to control the pushing and popping of the page state.

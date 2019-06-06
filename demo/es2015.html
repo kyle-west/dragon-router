@@ -46,6 +46,10 @@
     <p><a href="/start">/start</a></p>
     <p><a href="/start/bear">/start/bear</a></p>
     <br>
+    <p><a href="/some/regex/path">/some/regex/path</a></p>
+    <p><a href="/some/fancy/path/">/some/fancy/path/</a></p>
+    <p><a href="/some/regex/path/is/cool">/some/regex/path/is/cool</a></p>
+    <br>
     <p><a href="https://google.com">google.com</a></p>
     <p><a href="/should/404">/should/404</a></p>
 
@@ -103,6 +107,11 @@
       });
 
       router.use(['/:path/star*', '/star*'], middleware1, middleware2, (context) => {
+        document.getElementById('page-title').innerHTML = context.path;
+      })
+
+      router.use(/^\/some\/(regex|fancy)\/path.*$/, (context) => {
+        console.log("using RegExp to match:", context.path)
         document.getElementById('page-title').innerHTML = context.path;
       })
 

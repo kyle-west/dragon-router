@@ -114,19 +114,33 @@ export class DerivedSubpath {
 *******************************************************************************/
 export class RouteHandler {
   constructor (path, actions) {
-    this.path = path;
-    this.tokenizedPath = new TokenizedPath(path.replace(/\$:/g, ':'));
+    this.isRegex = (path instanceof RegExp);
+    if (this.isRegex) {
+      this.regex = path;
+    } else {
+      this.path = path;
+      this.tokenizedPath = new TokenizedPath(path.replace(/\$:/g, ':'));
+    }
     this.actions = actions;
   }
 
   matches (context) {
-    let path = context.path.replace(new RegExp(`^${context.basePath}`), '')
-    let matches = this.tokenizedPath.matches(path);
-    if (matches !== false) {
-      context.params = matches;
-      return [(c) => this.fireActions(c), context];
+    if (this.isRegex) {
+      if (this.regex.test(context.path)) {
+        context.params = {};
+        return [(c) => this.fireActions(c), context];
+      } else {
+        return []
+      }
     } else {
-      return [];
+      let path = context.path.replace(new RegExp(`^${context.basePath}`), '')
+      let matches = this.tokenizedPath.matches(path);
+      if (matches !== false) {
+        context.params = matches;
+        return [(c) => this.fireActions(c), context];
+      } else {
+        return [];
+      }
     }
   }
 
@@ -177,12 +191,19 @@ export class ClientRouter {
       firstArg.forEach(item => {
         this.use(item, ...actions);
       });
-    } else if (typeof firstArg === 'string') {
+    } else if (typeof firstArg === 'string' || firstArg instanceof RegExp) {
       this.registerHandlers(new RouteHandler(firstArg, actions));
+    } else {
+      console.error(`ClientRouter::use - first argument of type not supported:`, firstArg)
     }
   }
   
   registerHandlers (routeHandle, isRecursive = false) {
+    if (routeHandle.isRegex) {
+      this.registrar.push(routeHandle)
+      return
+    }
+
     let route = routeHandle.path;
 
     if (route.includes("?")) {

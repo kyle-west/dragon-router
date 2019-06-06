@@ -1,3 +1,13 @@
+function wait (cb, time) {
+  return new Promise ((resolve) => {
+    setTimeout(() => {
+      cb();
+      resolve()
+    }, time)
+  })
+}
+
+
 ['./dist/client-router', './dist/client-router.min'].forEach(distFile => {
   const {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath} = require(distFile)
   const router = new ClientRouter({registerOn: window});
@@ -13,71 +23,110 @@
   });
   
   test(`${distFile} :: We can define literal matchers`, () => {
+    let calledTimes = 0;
     router.use('/user', (context) => {
       expect(context.path).toBe('/user');
+      calledTimes += 1;
     })
   
     router.navigate('/user')
+    expect(calledTimes).toBe(1)
   });
   
   test(`${distFile} :: We can define section parameters`, () => {
+    let calledTimes = 0;
     router.use('/user/:section(info|settings)', (context) => {
       expect(['info', 'settings']).toContain(context.params.section);
+      calledTimes += 1;
     })
   
     router.navigate('/user/info')
     router.navigate('/user/settings')
+    expect(calledTimes).toBe(2)
   });
   
   test(`${distFile} :: We can define optional parameters`, () => {
+    let calledTimes = 0;
     router.use('/about/:person?', (context) => {
       expect([undefined, 'sally', 'sam']).toContain(context.params.person);
+      calledTimes += 1;
     })
   
     router.navigate('/about/')
     router.navigate('/about/sally')
     router.navigate('/about/sam')
+    expect(calledTimes).toBe(3)
   });
   
   test(`${distFile} :: We can define star routes`, () => {
+    let calledTimes = 0;
     router.use('/home*', (context) => {
       expect(context.path).toMatch(/^\/home.*$/);
+      calledTimes += 1;
     })
   
     router.navigate('/home')
     router.navigate('/homer')
     router.navigate('/home/test')
+    expect(calledTimes).toBe(3)
   });
   
   test(`${distFile} :: We can add middleware that can manipulate the Context`, () => {
+    let calledTimes = 0;
     router.use('/test/middleware', middleware1, middleware2, middleware3, (context) => {
       expect(context.params).toMatchObject({
         middleware1 : true, middleware2 : true, middleware3 : true
       });
+      calledTimes += 1;
     })
   
     router.navigate('/test/middleware')
+    expect(calledTimes).toBe(1)
   });
   
   test(`${distFile} :: We can use route handlers`, () => {
+    let calledTimes = 0;
     let handler = new RouteHandler('/test/route-handler', [middleware1, middleware2, middleware3, (context) => {
       expect(context.params).toMatchObject({
         middleware1 : true, middleware2 : true, middleware3 : true
       });
+      calledTimes += 1;
     }]);
     router.use(handler)
   
     router.navigate('/test/route-handler')
+    expect(calledTimes).toBe(1)
   });
   
-  test(`${distFile} :: We can use derived subpaths`, () => {
+  test(`${distFile} :: We can use derived subpaths`, async () => {
+    let calledTimes = 0;
     router.use(new DerivedSubpath('fillThisPartIn', () => 'this-part-was-filled-in'))
-    router.use('/test/$:fillThisPartIn/:rest(the-rest-of-the-path)', (context) => {
+    router.use('/test/$:fillThisPartIn(this-part-was-filled-in)/:rest(the-rest-of-the-path)', (context) => {
       expect(context.path).toBe('/test/this-part-was-filled-in/the-rest-of-the-path');
+      calledTimes += 1;
     })
   
     router.navigate('/test/the-rest-of-the-path')
     router.navigate('/test/this-part-was-filled-in/the-rest-of-the-path')
+
+    await wait(() => {
+      expect(calledTimes).toBe(2)
+    }, 50)
+  });
+
+  test(`${distFile} :: We can use RegExp`, () => {
+    let calledTimes = 0;
+    let matcher = new RegExp(/^\/this\/is\/a\/\w+\/matcher$/)
+    router.use(matcher, (context) => {
+      expect(context.path.startsWith('/this/is/a/')).toBe(true)
+      expect(context.path.endsWith('/matcher')).toBe(true)
+      calledTimes += 1;
+    })
+
+    router.navigate('/this/is/a/regex/matcher')
+    router.navigate('/this/is/a/cool/matcher')
+    router.navigate('/this/is/a/fancy/matcher')
+    expect(calledTimes).toBe(3)
   });
 
   router.unregister()

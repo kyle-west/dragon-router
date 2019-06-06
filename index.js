@@ -1,4 +1,4 @@
-import {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath} from "./client-router"
+import {Router, Context, DerivedSubpath, RouteHandler, TokenizedPath} from "./dragon-router"
 
-export default ClientRouter;
-export {ClientRouter, Context, DerivedSubpath, RouteHandler, TokenizedPath};
+export default Router;
+export {Router, Context, DerivedSubpath, RouteHandler, TokenizedPath};

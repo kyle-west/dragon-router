@@ -1,5 +1,5 @@
-import { ClientRouter, RouteHandler, DerivedSubpath } from '../dist/client-router.module.js';
-let router = new ClientRouter({
+import { Router, RouteHandler, DerivedSubpath } from '../dist/dragon-router.module.js';
+let router = new Router({
   basePath: '/demo', 
   routerId: 'demo-router', 
   debug: true,

@@ -1,6 +1,6 @@
 {
   "name": "dragon-router",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Express-like Client Side Routing Manager.",
   "authors": [
     "Kyle West <kyle-west@github.com>"

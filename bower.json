@@ -1,15 +1,18 @@
 {
   "name": "dragon-router",
-  "version": "1.0.1",
-  "description": "Express-like Client Side Routing Manager.",
+  "version": "1.0.2",
+  "description": "An ExpressJS-like client side router built from the ground up on debuggability and simplicity",
   "authors": [
     "Kyle West <kyle-west@github.com>"
   ],
   "main": "dragon-router.js",
   "keywords": [
     "client",
-    "routing",
+    "router",
     "pwa",
-    "dragons"
+    "routing",
+    "dragon",
+    "express",
+    "debug"
   ]
 }

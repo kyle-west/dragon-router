@@ -2,16 +2,19 @@
 
 ![](https://travis-ci.com/kyle-west/dragon-router.svg?branch=master)
 
-Dragon Router is an ExpressJS-like client side router. It grabs a hold on the 
-url when the user uses a link to navigate. This is intended to help progressive 
-web apps manage the frontend independent of a server call. It uses the browser's
-`history` API to control the pushing and popping of the page state.
+Dragon Router is an ExpressJS-like client side router built from the ground up 
+on [debuggability](#debugging) and [simplicity](#derived-subpaths).
+
+It uses the browser's `history` API to control the pushing and popping of page navigation;
+overwriting the need for a full page refresh on user navigation. Add it to your project with NPM:
 
 ```sh
 npm install --save dragon-router
 ```
 
-## Setup and usage
+# Setup and usage
+
+### ES6
 
 `Router` is an es6 class. Import it like you would any other module. After 
 setting up your routes (See [below](#route-matching)), register the router on the
@@ -21,49 +24,55 @@ window.
 import { Router } from 'dragon-router';
 const router = new Router();
 
-... // add route handling in here
+... // add routing rules here
 
 router.registerOn(window);
-router.start() // run this function after you have established routing rules, so the router knows it can immediately apply them
+router.start() // run this function after you have established routing rules, so that the router knows it should immediately apply them
 ```
+
+### CommonJS
 
 If you are using CommonJS, you may import the proper version from the `/dist` folder.
 
 ```js
-const {Router} = require('dragon-router/dist/dragon-router.min.js')
+const { Router } = require('dragon-router/dist/dragon-router.min.js')
 ```
+
+### Native Browser Sourcing
 
 Likewise, you can include it in your HTML from a `script` tag.
 
 ```html
+<!-- Globally Registered -->
 <script src="/path/to/dragon-router/dist/dragon-router.min.js"></script>
 
 OR
 
+<!-- ES6 Module Imports -->
 <script type="module" src="/path/to/dragon-router/dist/dragon-router.module.js"></script>
 ```
 
-### Options
+## Options
 
 ```js
 let options = {
   basePath: '/my-app/base/route',    // mount the router off of a specific path     [default is '/']
   routerId: 'my-cool-dragon-router', // unique identifier between apps              [default is a random number]
+  registerOn: window,                // bind to the client's browser immediately    [if not given, `router.registerOn(...)` must be called separately]
   debug: true                        // show additional logging info                [default is false]
-  registerOn: window                 // bind to the client's browser immediately    [if not given, `router.registerOn(...)` must be called separately]
 }
 
 const router = new Router(options);
 ```
 
-## `Router.use()`
+# `Router.use()`
 
 The `.use()` method allows us to apply matchers or behaviors to the routing. 
 
-### Route matching
+## Route matching
 
-Route matching follows a similar pattern as Express. You can match literal routes
-or a tokenized route that populates the `Context` with parameters.
+Route matching follows a similar pattern as Express. You can match with literal paths
+or parameterized paths (which populate the `Context` with parameters).
 
 ```js
 // render a page on a literal path matching
@@ -99,14 +108,12 @@ router.use('/:section(home|about)/:subSection', (context) => {
 Additionally, you may apply an array of matchers to a given handler.
 
 ```js
-let matchingRoutes = ['/home/:subSection', '/about/:subSection'];
-
-router.use(matchingRoutes, (context) => {
+router.use(['/home/:subSection', '/about/:subSection'], (context) => {
   // your code here
 });
 ```
 
-Full `RegExp` matchers are also supported.
+Full `RegExp` matchers are also supported. _(Note that these do not get parameterized, unlike the string matchers mentioned above)_
 
 ```js
 router.use(/^\/some\/fancy\/regular\/expression$/, (context) => {
@@ -115,7 +122,7 @@ router.use(/^\/some\/fancy\/regular\/expression$/, (context) => {
 ```
 
 
-#### Optional Subpaths
+### Optional Subpaths
 
 Additional syntax of matchers includes `*` and `?` postfixes to sections.
 
@@ -123,16 +130,16 @@ The `*` postfix (e.g. `/your/route*`) will match any incoming route that is
 prefixed with the text before the `*` character.
 
 The `?` postfix (e.g. `/your/:route?`) allows that section of the route to be 
-optional. Unlike [Derived Subpaths](#derived-subpaths), these section values are
-evaluated in the final callback of the middleware pipeline. 
+optional. If you want to have the router automatically populate an optional section 
+with data, see [Derived Subpaths](#derived-subpaths) below.
 
 
-### Derived Subpaths
+## Derived Subpaths
 
-A `DerivedSubpath` allows for a route to specify default values derived from a 
-given callback. The callback for the DerivedSubpath can return an `async` object 
-or a `String`. This is especially useful for forwarding to fully qualified paths 
-in your app. 
+A `DerivedSubpath` allows for a route to specify default values for an optional path.
+These are derived from a given callback. The callback for the DerivedSubpath can return 
+an `async` object or a `String`. This is especially useful for automatically redirecting 
+to fully qualified paths in your app. 
 
 Here is an example:
 
@@ -144,10 +151,14 @@ router.use(defaultSection);
 
 ...
 
+// prefixing a parameter with '$' tells the router we want to use a DerivedSubpath
 router.use('/page/$:section(main|about|contact)', renderPageSectionCB)
 ```
 
-By this principle, the following are equivalent:
+In this example, the `section` parameter will always be defined when `renderPageSectionCB` is ran.
+If the user goes to `/page`, they will be redirected to `/page/main` by the router.
+
+By this principle, the following two blocks are functionally equivalent:
 
 ```js
 router.use('/page', (context) => {
@@ -156,25 +167,25 @@ router.use('/page', (context) => {
 router.use('/page/:section(main|about|contact)', (context) => {
   router.redirect(`/page/${context.params.section}/default`);
 });
-router.use('/page/:section(main|about|contact)/:subsection', renderPageCB);
+router.use('/page/:section(main|about|contact)/:subsection(default|other)', renderPageCB);
 ```
 
 and 
 
 ```js
-router.use(new DerivedSubpath('section',    _ => 'main'));
-router.use(new DerivedSubpath('subsection', _ => 'default'));
-router.use('/page/$:section(main|about|contact)/$:subsection', renderPageCB);
+router.use(new DerivedSubpath('section', () => 'main'));
+router.use(new DerivedSubpath('subsection', () => 'default'));
+router.use('/page/$:section(main|about|contact)/$:subsection(default|other)', renderPageCB);
 ```
 
-The later being easier to read and understand by the developer than the former.
+The latter being easier for the developer to hold in their mental model of the routing.
 
-### Middleware
+## Middleware
 
 Middleware is a pipeline of functions that get applied when a matching route is 
 rendered. A middleware function takes two parameters, `context`, and `next`. The `next`
-argument is a function that envokes the next middleware in the pipeline. Naturally, 
- `next()` should not be called in the last function of the pipeline.
+argument is a callback that invokes the next middleware in the pipeline. Naturally, 
+`next()` should not be called in the last function of the pipeline.
 
 ```js
 let loggingMiddleware = (context, next) => {
@@ -184,10 +195,11 @@ let loggingMiddleware = (context, next) => {
 
 ...
 
-router.use('/:view', loggingMiddleware, renderYourAboutPageCB);
+router.use('/:view', loggingMiddleware, renderYourViewCB);
 ```
 
-Alternatively, functions that are given to `router.use(...)` without a matcher are added as global middleware, and ran for every matching route.
+Alternatively, functions that are given to `Router.use(...)` without a matcher are 
+treated as global middleware, and ran for every route.
 
 ```js
 router.use(loggingMiddleware);
@@ -195,7 +207,7 @@ router.use(someOtherMiddleware1, someOtherMiddleware2); // accepts multiple midd
 ```
 
 
-### `RouteHandler`
+## `RouteHandler`
 
 If you wish to make a particular handler reusable, you may form it as a `RouteHandler` for your convenience.
 
@@ -217,8 +229,31 @@ In the event that you wish to remove the router from your application, you will 
 
 ```js
 router.unregister()
-delete router
+router = undefined; // or whatever your flavor of deleting objects in JS
 ```
+
+# Debugging
+
+Dragon Router was built with debuggability in mind. In the console, you have access 
+to valuable information that can help you understand what the router is doing.
+
+```
+> window.attachedRouter
+```
+This feature allows us to poke into the internals of the router and understand 
+information about the callback `registrar` and what paths are handled by which callbacks.
+
+![](./demo/misc/window.attachedRouter.png)
+
+Additionally, when you add the option `{ debug: true }` to the router, we get helpful output from the 
+router live as the user navigates around the page.
+
+```js
+const router = new Router({ debug: true });
+```
+
+![](./demo/misc/demo.equals.true.png)
+
 
 # Using with ReactJS
 
@@ -234,9 +269,14 @@ import { DefaultPage, ExamplePage } from '../my-client-rendered-pages'
 function attachRouter (updatePage) {
   return () => {
     const router = new Router({ registerOn: window })
+    
+    // set up routing rules
     router.use('/example', ctx => updatePage(<ExamplePage context={ctx} />))
-    router.use('*',        ctx => updatePage(<DefaultPage context={ctx} />))
+    router.use('*', ctx => updatePage(<DefaultPage context={ctx} />))
     router.start()
+
+    // cleanup callback
+    return () => router.unregister()
   }
 }
 

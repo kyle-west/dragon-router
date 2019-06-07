@@ -184,7 +184,7 @@ export class Router {
     if (firstArg instanceof DerivedSubpath) {
       this.subPaths[firstArg.name] = firstArg.callback;
     } else if (firstArg instanceof RouteHandler) {
-      this.registerHandlers(firstArg);
+      this._registerHandlers(firstArg);
     } else if (firstArg instanceof Function) { // middleware
       this.globalActions = [...this.globalActions, firstArg, ...actions];
     } else if (firstArg instanceof Array) {
@@ -192,13 +192,14 @@ export class Router {
         this.use(item, ...actions);
       });
     } else if (typeof firstArg === 'string' || firstArg instanceof RegExp) {
-      this.registerHandlers(new RouteHandler(firstArg, actions));
+      this._registerHandlers(new RouteHandler(firstArg, actions));
     } else {
       console.error(`Router::use - first argument of type not supported:`, firstArg)
     }
+    return this;
   }
   
-  registerHandlers (routeHandle, isRecursive = false) {
+  _registerHandlers (routeHandle, isRecursive = false) {
     if (routeHandle.isRegex) {
       this.registrar.push(routeHandle)
       return
@@ -218,8 +219,8 @@ export class Router {
         }
       });
 
-      this.registerHandlers(new RouteHandler(part.join('/'), routeHandle.actions))
-      this.registerHandlers(new RouteHandler(full.join('/'), routeHandle.actions))
+      this._registerHandlers(new RouteHandler(part.join('/'), routeHandle.actions))
+      this._registerHandlers(new RouteHandler(full.join('/'), routeHandle.actions))
       return;
     }
 
@@ -241,7 +242,7 @@ export class Router {
 
       let remainingRoute = route.replace('$:', ':');
       if (remainingRoute.includes('$:')) {
-        this.registerHandlers(new RouteHandler(remainingRoute), true)
+        this._registerHandlers(new RouteHandler(remainingRoute), true)
       } 
       let afterSections = rest.split('/').slice(1)
       let routeWithRemovedSection = [before, ...afterSections].join('/');
@@ -284,6 +285,7 @@ export class Router {
     } else {
       throw new Error(`ClilentRouter::registerOn(): a router is already attached: Router {#${window.attachedRouter.routerId}}`)
     }
+    return this;
   }
 
   unregister () {
@@ -292,6 +294,7 @@ export class Router {
     window.removeEventListener('popstate', this._onPopState);
     this.window.attachedRouter = null;
     delete this.window.attachedRouter;
+    return this;
   }
 
   _onClick (e) {
@@ -336,9 +339,9 @@ export class Router {
             console.log(this.registrar[i])
           }
           
-          this.fireGlobalActions(ctx);
+          this._fireGlobalActions(ctx);
           fireMatchingActions(ctx);
-          this.pushState(ctx, replaceState);
+          this._pushState(ctx, replaceState);
           
           if (this.debug) {
             console.groupEnd(`Router {${this.routerId}}::[route match]: ${ctx.path}`);
@@ -350,7 +353,7 @@ export class Router {
     this.window.location = context.url;
   }
   
-  pushState (context, replace = false) {
+  _pushState (context, replace = false) {
     if (!context.isRecordedHistory) {
       context.isRecordedHistory = true;
       if (replace) {
@@ -361,7 +364,7 @@ export class Router {
     }
   }
 
-  fireGlobalActions (context) {
+  _fireGlobalActions (context) {
     let idx = 0;
     let next = () => {
       let fn = this.globalActions[idx++];
@@ -372,21 +375,27 @@ export class Router {
 
   redirect (path) {
     this.evaluate(new Context(path, this.routerId), true);
+    return this;
   }
 
   navigate (path) {
     this.evaluate(new Context(path, this.routerId));
+    return this;
   }
 
   back () {
     this.window.history.back();
+    return this;
   }
 
   forward () {
     this.window.history.forward();
+    return this;
   }
 
   start () {
+    if (!this.window) this.window = window; // assume client window if not specified
     this.evaluate(new Context(this.window.location.href, this.routerId));
+    return this;
   }
 }

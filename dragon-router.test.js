@@ -195,4 +195,24 @@ function wait (cb, time) {
 
   router3.unregister()
 
+  test(`${distFile} :: Router methods are chainable`, () => {
+    let calledTimes = 0;
+    
+    new Router()
+      .registerOn(window)
+      .use('/test/chainable', (ctx) => {
+        calledTimes += 1;
+        expect(ctx.globalMiddlewareFired).toBe(true)
+      })
+      .use((ctx, next) => {
+        ctx.globalMiddlewareFired = true;
+        next();
+      })
+      .navigate('/test/chainable')
+      .back()
+      .forward()
+      .unregister()
+
+    expect(calledTimes).toBe(1)
+  })
 })

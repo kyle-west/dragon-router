@@ -166,7 +166,14 @@ class Router {
     this.registrar = [];
     this.globalActions = [];
     this.subPaths = {};
-    this.basePath = options.basePath || '';
+    
+    // treat `/` and `` basePaths the same
+    if (!options.basePath || options.basePath === '/') {
+      this.basePath = '';
+    } else {
+      this.basePath = options.basePath || '';
+    }
+    
 
     if (options.registerOn) {
       this.registerOn(options.registerOn)

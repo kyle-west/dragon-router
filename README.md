@@ -1,6 +1,8 @@
 # 🐉 Dragon Router
 
 [![](https://travis-ci.com/kyle-west/dragon-router.svg?branch=master)](https://travis-ci.com/kyle-west/dragon-router/branches)
+[![](https://img.shields.io/npm/v/dragon-router.svg)](https://www.npmjs.com/package/dragon-router)
+[![](https://img.shields.io/npm/dt/dragon-router.svg)](https://www.npmjs.com/package/dragon-router)
 
 Dragon Router is an ExpressJS-like client side router built from the ground up 
 on [debuggability](#debugging) and [simplicity](#derived-subpaths).

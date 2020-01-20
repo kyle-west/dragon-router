@@ -54,7 +54,8 @@ class TokenizedPath {
         let regex = /.+/;
         return {name, regex};
       } else {
-        return {regex: new RegExp('^'+part+'$')};
+        let test = part === '*' ? '.*' : part;
+        return {regex: new RegExp('^'+test+'$')};
       }
     })
   }
@@ -406,7 +407,6 @@ class Router {
     return this;
   }
 }
-
 if (typeof module === 'object' && module.exports) {
   module.exports = {Router, Context, DerivedSubpath, RouteHandler, TokenizedPath}
 } else {

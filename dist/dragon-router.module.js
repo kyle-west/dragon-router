@@ -54,7 +54,8 @@ export class TokenizedPath {
         let regex = /.+/;
         return {name, regex};
       } else {
-        return {regex: new RegExp('^'+part+'$')};
+        let test = part === '*' ? '.*' : part;
+        return {regex: new RegExp('^'+test+'$')};
       }
     })
   }

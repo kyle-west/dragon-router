@@ -1,6 +1,6 @@
 {
   "name": "dragon-router",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "An ExpressJS-like client side router built from the ground up on debuggability and simplicity",
   "authors": [
     "Kyle West <kyle-west@github.com>"

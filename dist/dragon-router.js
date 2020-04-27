@@ -191,8 +191,10 @@ class Router {
   use (firstArg, ...actions) {
     if (firstArg instanceof DerivedSubpath) {
       this.subPaths[firstArg.name] = firstArg.callback;
+      if (actions.length > 0) { this.use(...actions) }
     } else if (firstArg instanceof RouteHandler) {
       this._registerHandlers(firstArg);
+      if (actions.length > 0) { this.use(...actions) }
     } else if (firstArg instanceof Function) { // middleware
       this.globalActions = [...this.globalActions, firstArg, ...actions];
     } else if (firstArg instanceof Array) {
@@ -262,7 +264,7 @@ class Router {
             let matcher = s.match(/[$]?:/)
             if (matcher) {
               let sectionName = s.replace(matcher[0], '').split('(')[0];
-              if (matcher[0].startsWith('$')) {
+              if (matcher[0].startsWith('$') && !context.params[sectionName]) {
                 return this.subPaths[sectionName](context)
               } else {
                 return context.params[sectionName] || s
@@ -407,6 +409,7 @@ class Router {
     return this;
   }
 }
+
 if (typeof module === 'object' && module.exports) {
   module.exports = {Router, Context, DerivedSubpath, RouteHandler, TokenizedPath}
 } else {
